@@ -9,7 +9,7 @@ It demonstrates core RAG concepts end-to-end:
 * **Hybrid fusion** → merge SQL and vector results
 * **LLM synthesis** → grounded answer using a local Ollama LLM
 
-The goal is to show clear understanding of **how RAG works internally** by implementing each step directly.
+The purpose is to give a clear, hands-on view of how RAG operates by building each component directly.
 
 ---
 
