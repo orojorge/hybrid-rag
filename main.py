@@ -624,7 +624,7 @@ def main():
     parser = argparse.ArgumentParser(description="Hybrid Query System (skeleton)")
     parser.add_argument("question", nargs="?", help="Natural language question")
     parser.add_argument("--trace", action="store_true", help="Print JSON trace to stderr")
-    parser.add_argument("--repl", action="store_true", help="Interactive REPL")
+    # parser.add_argument("--repl", action="store_true", help="Interactive REPL")
     args = parser.parse_args()
 
     pipeline = build_pipeline()
@@ -635,26 +635,20 @@ def main():
         print("\nCitations:", json.dumps(ans.citations))
         if args.trace:
             print("\n--- TRACE ---", file=sys.stderr)
-            # print(json.dumps(ans.traces, indent=2), file=sys.stderr)
             print(ans.claims)
             print(json.dumps(ans.meta, indent=2), file=sys.stderr)
 
-    if args.repl:
-        print("Hybrid Query REPL. Type 'exit' to quit.")
-        while True:
-            try:
-                q = input("> ").strip()
-            except EOFError:
-                break
-            if q.lower() in ("exit", "quit"):
-                break
-            if not q:
-                continue
-            ask(q)
-    else:
-        if not args.question:
-            parser.error("Provide a question or use --repl")
-        ask(args.question)
+    print("Hybrid Query REPL. Type 'exit' to quit.")
+    while True:
+        try:
+            q = input("> ").strip()
+        except EOFError:
+            break
+        if q.lower() in ("exit", "quit"):
+            break
+        if not q:
+            continue
+        ask(q)
 
 
 if __name__ == "__main__":
