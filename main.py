@@ -17,6 +17,7 @@ class QueryInterpreter:
     Very simple query understanding:
     - classify intent: sql / text / hybrid
     - optionally detect a location keyword for filtering structured rows.
+    - TO DO: have an LLM to interpret the query.
     """
 
     SUPPORTED_LOCATIONS = [
@@ -45,7 +46,7 @@ class QueryInterpreter:
 
 def fuse_results(sql_res: Optional[RetrievalResult], vec_res: Optional[RetrievalResult]) -> RetrievalResult:
     """
-    Simple hybrid fusion:
+    Hybrid fusion:
     - concatenate rows and passages
     - gather diagnostics from both stages
     """
