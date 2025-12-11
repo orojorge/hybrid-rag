@@ -124,17 +124,15 @@ class SQLRetriever:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
-    def retrieve(self, language: Optional[str] = None, limit: int = 10) -> RetrievalResult:
+    def retrieve(self, location: Optional[str] = None, limit: int = 10) -> RetrievalResult:
         t0 = time.time()
         sql = "SELECT * FROM work"
         params: List[Any] = []
 
         clauses: List[str] = []
-        if language:
-            # Example heuristic: filter by language name appearing in project name or client
-            clauses.append("(LOWER(name) LIKE ? OR LOWER(client) LIKE ?)")
-            like_val = f"%{language}%"
-            params.extend([like_val, like_val])
+        if location:
+            clauses.append("LOWER(location) LIKE ?")
+            params.append(f"%{location}%")
 
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)

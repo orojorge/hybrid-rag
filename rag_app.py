@@ -13,10 +13,13 @@ class QueryInterpreter:
     """
     Very simple query understanding:
     - classify intent: sql / text / hybrid
-    - optionally detect a language keyword for filtering structured rows.
+    - optionally detect a location keyword for filtering structured rows.
     """
 
-    SUPPORTED_LANGS = ["python", "javascript", "java", "go", "rust"]
+    SUPPORTED_LOCATIONS = [
+        "paris", "france", "mexico", "new york", "china", "korea",
+        "usa", "germany", "italy", "spain"
+    ]
 
     def interpret(self, q: NLQuery) -> tuple[Intent, Optional[str]]:
         text = q.text.lower()
@@ -33,8 +36,8 @@ class QueryInterpreter:
         else:
             kind = "hybrid"
 
-        lang = next((l for l in self.SUPPORTED_LANGS if l in text), None)
-        return Intent(kind=kind, confidence=0.6), lang
+        loc = next((l for l in self.SUPPORTED_LOCATIONS if l in text), None)
+        return Intent(kind=kind, confidence=0.6), loc
 
 
 
@@ -145,13 +148,13 @@ class PipelineController:
             )
 
         q = NLQuery(text=text)
-        intent, lang = self.interpreter.interpret(q)
+        intent, loc = self.interpreter.interpret(q)
 
         sql_res: Optional[RetrievalResult] = None
         vec_res: Optional[RetrievalResult] = None
 
         if intent.kind in ("sql", "hybrid"):
-            sql_res = self.sql_retriever.retrieve(language=lang, limit=10)
+            sql_res = self.sql_retriever.retrieve(location=loc, limit=10)
 
         if intent.kind in ("text", "hybrid"):
             vec_res = self.vec_store.search(query=q.text, top_k=3)
@@ -186,7 +189,7 @@ def main():
     print("Hybrid RAG REPL. Type 'exit' to quit.")
     while True:
         try:
-            q = input("> ").strip()
+            q = input("\n> ").strip()
         except EOFError:
             break
 
