@@ -2,10 +2,13 @@ from typing import Optional, List, Dict, Any
 import argparse
 import json
 import sys
+import textwrap
+import requests
 
 from models import NLQuery, Intent, RetrievalResult, Answer, Passage
 from sql_backend import boot_inmemory_sqlite, SQLRetriever
 from vector_store import VectorStore
+from answer_synthesizer import AnswerSynthesizer
 
 
 
@@ -17,9 +20,8 @@ class QueryInterpreter:
     """
 
     SUPPORTED_LOCATIONS = [
-        "paris", "france", "mexico", "new york", "china", "korea",
-        "usa", "germany", "italy", "spain"
-    ]
+        "paris", "france", "mexico", "new york city", "china", "xiamen",
+        "usa", "germany", "italy", "spain", "puerto escondido" ]
 
     def interpret(self, q: NLQuery) -> tuple[Intent, Optional[str]]:
         text = q.text.lower()
@@ -41,10 +43,7 @@ class QueryInterpreter:
 
 
 
-def fuse_results(
-    sql_res: Optional[RetrievalResult],
-    vec_res: Optional[RetrievalResult],
-) -> RetrievalResult:
+def fuse_results(sql_res: Optional[RetrievalResult], vec_res: Optional[RetrievalResult]) -> RetrievalResult:
     """
     Simple hybrid fusion:
     - concatenate rows and passages
@@ -64,62 +63,7 @@ def fuse_results(
         if vec_res.diagnostics:
             diagnostics["stages"].append({"vector": vec_res.diagnostics})
 
-    return RetrievalResult(
-        sql_rows=sql_rows,
-        passages=passages,
-        diagnostics=diagnostics,
-    )
-
-
-
-class AnswerSynthesizer:
-    """
-    Turn fused retrieval results into a short, grounded answer
-    with explicit citations and traces.
-    """
-
-    def synthesize(self, q: NLQuery, intent: Intent, fused: RetrievalResult) -> Answer:
-        parts: List[str] = []
-
-        # Structured summary (SQL)
-        if fused.sql_rows:
-            parts.append("Structured results from the work table:")
-            for row in fused.sql_rows[:3]:
-                name = row.get("name", "Unknown project")
-                client = row.get("client") or "Unknown client"
-                loc = row.get("location") or "Unknown location"
-                year = row.get("year") or "Unknown year"
-                parts.append(f"- {name} for {client} in {loc} ({year})")
-
-        # Context snippets (vector passages)
-        if fused.passages:
-            if parts:
-                parts.append("")
-            parts.append("Context from retrieved documents:")
-            for p in fused.passages[:3]:
-                text = p.text.strip()
-                if len(text) > 200:
-                    text = text[:197] + "…"
-                parts.append(f"- [{p.doc_id}] {text}")
-
-        if not parts:
-            parts.append("I couldn't find any matching projects. Try rephrasing or being more specific.")
-
-        answer_text = "\n".join(parts)
-
-        # Build citations
-        citations = {
-            "sql": ["work"] if fused.sql_rows else [],
-            "docs": [p.doc_id for p in fused.passages] if fused.passages else [],
-        }
-
-        traces = {
-            "intent": intent.kind,
-            "diagnostics": fused.diagnostics,
-            "question": q.text,
-        }
-
-        return Answer(text=answer_text, citations=citations, traces=traces)
+    return RetrievalResult(sql_rows=sql_rows, passages=passages, diagnostics=diagnostics)
 
 
 
@@ -144,8 +88,7 @@ class PipelineController:
             return Answer(
                 text="Please provide a non-empty question.",
                 citations={},
-                traces={"error": "empty_question"},
-            )
+                traces={"error": "empty_question"} )
 
         q = NLQuery(text=text)
         intent, loc = self.interpreter.interpret(q)
@@ -174,7 +117,7 @@ def build_pipeline() -> PipelineController:
     vec_store.load_corpus("corpus")
 
     interpreter = QueryInterpreter()
-    synthesizer = AnswerSynthesizer()
+    synthesizer = AnswerSynthesizer(model_name="gemma3:4b")
 
     return PipelineController(sql_ret, vec_store, interpreter, synthesizer)
 
@@ -186,7 +129,7 @@ def main():
 
     pipeline = build_pipeline()
 
-    print("Hybrid RAG REPL. Type 'exit' to quit.")
+    print("\nWhat can I find for you today?")
     while True:
         try:
             q = input("> ").strip()
@@ -203,7 +146,7 @@ def main():
         print("\nCitations:", json.dumps(ans.citations))
 
         if args.trace:
-            print("\n--- TRACE ---", file=sys.stderr)
+            print("\n\n- - - - - TRACE - - - - -", file=sys.stderr)
             print(json.dumps(ans.traces, indent=2), file=sys.stderr)
 
 
