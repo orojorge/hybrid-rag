@@ -91,7 +91,6 @@ Use when the question mixes facts + explanations:
 * Vector → retrieves descriptions mentioning design features
 * LLM → synthesizes answer from both
 
----
 
 ### **SQL-Only Retrieval**
 
@@ -102,7 +101,6 @@ Questions requesting counts, lists, filters, or metadata:
 Intent → `sql`
 Only structured rows are used.
 
----
 
 ### **Text-Only Retrieval**
 
