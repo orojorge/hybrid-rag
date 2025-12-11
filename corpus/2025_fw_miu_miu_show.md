@@ -1,0 +1,3 @@
+For the Fall/Winter 2025 Miu Miu show space, AMO has designed a contemporary palace within the Palais d'Iéna.
+
+The inner structure, wrapped in bright yellow moiré fabric, asserts a dominant presence in the hypostyle room, its shifting textures amplifying the movement within. A freestanding volume, it draws viewers in while allowing them to move around it. The runway is flanked by two grand tribunes, framed by an unevenly spaced colonnade that subtly disrupts the rhythm of the building's columns. The interplay of columns allows natural light to reach the runway, maintaining a quiet connection to the outside world. In contrast to the opulence of the yellow fabric, found chairs are arranged in clusters, introducing an element of informality and spontaneity.

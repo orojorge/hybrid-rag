@@ -1,0 +1,7 @@
+JOMOO Headquarters is the first office campus for China’s largest sanitaryware company. Located in Xiamen’s central business district, the building stands between dense high-rises on one side and forested hills on the other, encapsulating the coexistence of nature and urbanization that defines the island city’s landscape.
+
+The design responds to this duality through a continuous, sculptural form that reinterprets the conventional podium-and-tower office typology. A multifaceted volume that draws from the rocky terrain nearby hosts the public program: the lobby, a showroom, and a multipurpose hall with conference spaces and recruitment rooms. Above, the tower emerges seamlessly, housing JOMOO’s office spaces.
+
+The façade is articulated in white vertical stripes oriented in different directions. Evoking the window tracery typical of houses in the region and recalling JOMOO’s ceramic production, the system defines a distinct visual identity for the building within the city’s rapidly evolving skyline. Inside, it eliminates the need for columns, allowing for flexible and efficient floor plates throughout. Entrances are integrated into the façade where its irregular geometry folds, creating spatially generous and legible access points.
+
+JOMOO Headquarters refers both to craft and to high-tech production, elements of the company’s mission and characteristics of the culture of Xiamen, past and present.

@@ -1,0 +1,9 @@
+OMA was retained as master planners for the Brooklyn Academy of Music's new Cultural District, an approximately 1.5 million SF mixed-use development on four empty sites immediately adjacent to the BAM center. The development would create performance, exhibition, rehearsal, and office space for smaller cultural institutions and organizations priced out of Manhattan real estate, and combine that with new low and middle-income housing.
+
+The project aimed to provide a vibrant new cultural district outside of Manhattan and give a much-needed focus to an important historic Brooklyn neighborhood in the midst of revival. The plan sought to maximize permeability between the new buildings and the surrounding Fort Greene neighborhood.
+
+Each site is treated as a dense combination of art-related and residential program, with their interfaces forming 'mixing chambers' of space that extend into the existing streetscape. The project seeks to integrate the District's future inhabitants with the cultural life of the site itself, creating a unique place for people to work and live.
+
+OMA has been intimately involved with the public process necessary to bring the project to fruition, attending community meetings and presenting the project to the neighborhood and the cultural institutions, as well as helping to secure the necessary political backing.
+
+OMA has also been actively seeking other interesting architects to work with on the individual sites, believing that the true test of a Master Plan is the quality of collaboration. The first projects for the district, a performing arts library designed by Enrique Norten, a theater by Diller+Scofidio, a theater by Hardy Holzman Pfeiffer, and a housing and cultural project by OMA, are all currently in process.

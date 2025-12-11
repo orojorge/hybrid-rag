@@ -6,6 +6,7 @@ import sqlite3
 import sys
 import time
 import uuid
+from pathlib import Path
 from data_model import ( ContentSelector, FactExtractor, RationaleExtractor, MicroPlanner, SurfaceRealizer,
     ClaimAuditor, CitationManager, Redactor, LengthController, EvidenceBundle, AnswerSpec, GoalType,
     ComposedAnswer, AnswerComposer, Claim, AnswerSections, EvidenceRow, EvidencePassage )
@@ -569,12 +570,15 @@ def boot_inmemory_sqlite() -> sqlite3.Connection:
     conn.commit()
     return conn
 
+def load_corpus(folder: str = "corpus") -> Dict[str, str]:
+    docs: Dict[str, str] = {}
+    for path in Path(folder).glob("*"):
+        docs[path.stem] = path.read_text()
+    return docs
+
 def boot_text_corpus(embedder: Embedder, index: VectorIndex, store: TextStore):
-    docs = {
-        "doc_flask_crit": "Flask critical vulnerabilities often relate to unsafe debug mode and serialization. Mitigate by disabling debug in prod, pinning safe versions, and validating inputs.",
-        "doc_py_mitig":  "Python project mitigation: use virtual environments, pin dependencies, run `pip-audit`, enforce code reviews, and apply security headers when serving HTTP.",
-        "doc_js_ctx":    "Common JS issues include prototype pollution and XSS in templating. Sanitize inputs and use trusted templating engines."
-    }
+    docs = load_corpus()
+
     store.upsert({k: v for k, v in docs.items()})
     vecs = embedder.embed_texts(list(docs.values()))
     metas = [{"text": v} for v in docs.values()]
@@ -589,12 +593,14 @@ def build_pipeline() -> PipelineController:
     builder = SQLQueryBuilder()
     sql_client = SQLClient(conn)
     sql_ret = SQLRetriever(inspector, builder, sql_client)
+
     # Vector
     embedder = Embedder()
     vindex = VectorIndex()
     tstore = TextStore()
     boot_text_corpus(embedder, vindex, tstore)
     vec_ret = VectorRetriever(embedder, vindex, tstore)
+    
     # Other
     components = dict(
         guardrails=Guardrails(),
