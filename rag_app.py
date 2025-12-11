@@ -21,7 +21,7 @@ class QueryInterpreter:
 
     SUPPORTED_LOCATIONS = [
         "paris", "france", "mexico", "new york city", "china", "xiamen",
-        "usa", "germany", "italy", "spain", "puerto escondido" ]
+        "usa", "puerto escondido" ]
 
     def interpret(self, q: NLQuery) -> tuple[Intent, Optional[str]]:
         text = q.text.lower()

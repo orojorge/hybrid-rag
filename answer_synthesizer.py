@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple
 import textwrap
 import requests
 
-from models import (NLQuery, Intent, RetrievalResult, Answer, Passage)
+from models import NLQuery, Intent, RetrievalResult, Answer, Passage
 
 
 class AnswerSynthesizer:
