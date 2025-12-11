@@ -81,7 +81,7 @@ Then:
 
 ## **Search Scenarios**
 
-### **🟦 Hybrid Search (SQL + Vector)**
+### **Hybrid Search (SQL + Vector)**
 
 Use when the question mixes facts + explanations:
 
@@ -93,7 +93,7 @@ Use when the question mixes facts + explanations:
 
 ---
 
-### **🟩 SQL-Only Retrieval**
+### **SQL-Only Retrieval**
 
 Questions requesting counts, lists, filters, or metadata:
 
@@ -104,7 +104,7 @@ Only structured rows are used.
 
 ---
 
-### **🟪 Text-Only Retrieval**
+### **Text-Only Retrieval**
 
 Questions asking for explanations or reasoning:
 
