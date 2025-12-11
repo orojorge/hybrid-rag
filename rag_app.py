@@ -94,9 +94,9 @@ class AnswerSynthesizer:
         # Context snippets (vector passages)
         if fused.passages:
             if parts:
-                parts.append("")  # blank line
+                parts.append("")
             parts.append("Context from retrieved documents:")
-            for p in fused.passages[:2]:
+            for p in fused.passages[:3]:
                 text = p.text.strip()
                 if len(text) > 200:
                     text = text[:197] + "…"
@@ -189,7 +189,7 @@ def main():
     print("Hybrid RAG REPL. Type 'exit' to quit.")
     while True:
         try:
-            q = input("\n> ").strip()
+            q = input("> ").strip()
         except EOFError:
             break
 
