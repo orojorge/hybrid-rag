@@ -129,15 +129,20 @@ class SchemaInspector:
 
     def describe(self) -> Dict[str, Any]:
         # Return minimal schema info for demo
-        return {"tables": {"vulns": ["id", "package", "language", "severity", "year"]}}
+        return {"tables": {"work": ["id", "name", "location", "client", "year", "status", "program", "partner", "associate", "team"]}}
 
     def find_columns(self, semantic_hint: str) -> List[Tuple[str, str]]:
         # Heuristic mapping for demo
         mapping = {
-            "language": [("vulns", "language")],
-            "severity": [("vulns", "severity")],
-            "package":  [("vulns", "package")],
-            "year":     [("vulns", "year")],
+            "name": [("work", "name")],
+            "location": [("work", "location")],
+            "client": [("work", "client")],
+            "year": [("work", "year")],
+            "status": [("work", "status")],
+            "program": [("work", "program")],
+            "partner": [("work", "partner")],
+            "associate": [("work", "associate")],
+            "team": [("work", "team")],
         }
         return mapping.get(semantic_hint, [])
 
@@ -208,13 +213,13 @@ class SQLQueryBuilder:
     def sanitize_constraints(self, constraints: Dict[str, Any]) -> SQLSpec:
         where: Dict[str, Any] = {}
         if constraints.get("language"):
-            where["vulns.language"] = constraints["language"].capitalize()
+            where["work.language"] = constraints["language"].capitalize()
         # Demo aggregation: count by severity
         return SQLSpec(
-            tables=["vulns"],
-            select=["vulns.severity", "COUNT(*) AS cnt"],
+            tables=["work"],
+            select=["work.severity", "COUNT(*) AS cnt"],
             where=where,
-            group_by=["vulns.severity"],
+            group_by=["work.severity"],
             order_by=[("cnt", "DESC")],
             limit=10
         )
@@ -344,7 +349,7 @@ class AnswerSynthesizer:
             parts.append(f"Structured findings (top {min(5, len(fused.sql_rows))}):")
             for row in fused.sql_rows[:5]:
                 parts.append(f"  - {row}")
-            cits["sql"].append("vulns")
+            cits["sql"].append("work")
 
         if fused.passages:
             parts.append("Relevant context:")
@@ -383,7 +388,7 @@ class SimpleFactExtractor(FactExtractor):
                 txt = f"{v['package']} has {v['severity']} issues"
             else:
                 txt = ", ".join(f"{k}={v[k]}" for k in list(v.keys())[:3])
-            claims.append(Claim(text=txt, kind="fact", grounded_in_sql=True, evidence_refs=["SQL:vulns"], confidence=0.5))
+            claims.append(Claim(text=txt, kind="fact", grounded_in_sql=True, evidence_refs=["SQL:work"], confidence=0.5))
         return claims
 
 
@@ -424,10 +429,10 @@ class PlainRealizer(SurfaceRealizer):
 
 class SimpleCitations(CitationManager):
     def build(self, claims: List[Claim], evidence: EvidenceBundle) -> Tuple[List[str], Dict[str, List[str]]]:
-        sql_ids = ["vulns"] if evidence.sql else []
+        sql_ids = ["work"] if evidence.sql else []
         doc_ids = [p.doc_id for p in evidence.passages]
         anchors = []
-        if sql_ids: anchors.append("[SQL:vulns]")
+        if sql_ids: anchors.append("[SQL:work]")
         anchors += [f"[DOC:{d}]" for d in doc_ids[:3]]
         return anchors, {"sql": sql_ids, "docs": doc_ids}
 
@@ -539,23 +544,28 @@ def boot_inmemory_sqlite() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:")
     cur = conn.cursor()
     cur.execute("""
-        CREATE TABLE vulns (
+        CREATE TABLE work (
             id INTEGER PRIMARY KEY,
-            package TEXT,
-            language TEXT,
-            severity TEXT,
-            year INTEGER
+            name TEXT,
+            location TEXT,
+            client TEXT,
+            year INTEGER,
+            status TEXT,
+            program TEXT,
+            partner TEXT,
+            associate TEXT,
+            team TEXT
         )
     """)
     demo_rows = [
-        (1, "requests", "Python", "high", 2024),
-        (2, "flask",    "Python", "critical", 2024),
-        (3, "lodash",   "Javascript", "medium", 2023),
-        (4, "express",  "Javascript", "high", 2024),
-        (5, "numpy",    "Python", "low", 2024),
-        (6, "flask",    "Python", "critical", 2025),
+        (1, "2025 FW Miu Miu Show", "Paris, France", "Miu Miu", 2025, "Completed", "Scenography", "Rem Koolhaas", "Giulio Margheri", "Luisa Carvalho, Raffaele Guercia"),
+        (2, "Busan Slope Housing", "", "Busan Architecture Festival", 2025, "Commissioned Study", "Masterplan", "Chris van Dujn", "John Thurtle", "Jeremy Chow, Freddy Maggiorani, Xaveer Roodbeen, Felicia Gambino, Suhin Park"),
+        (3, "JOMOO Headquarters", "Xiamen, China", "Jomoo", 2025, "Completed", "Office", "Chris van Dujin", "", "Mark Bavoso, Slava Savova, Sebastian Schulte, Pu Hsien Chan, Alan Lau, Chen Lu, Slava Savova, Sebastian Schulte, Ricky Suen, Gabriele Ubareviciute, Yue Wu, Adisak Yavilas, Cecilia Lei, Chen Lu, Kevin Mak, Ricky Suen, Connor Sullivan, Gabriele Ubareviciute, Chen Lu, Lingxiao Zhang"),
+        (4, "Casa Wabi Mushroom Pavilion", "Puerto Escondido, Mexico", "Fundación Casa Wabi", 2024, "Construction", "Mixed Use", "Shohei Shigematsu", "", "Caroline Corbett, Shary Tawil, Francesco Rosati, Dylan Wei"),
+        (5, "AIR - Circular Campus and Cooking Club", "", "Potato Head", 2024, "Completed", "Restaurant / Bar", "David Gianotten", "Shinji Takagi", "Marina Bonet, Matteo Fontana, Helena Daher Gomes, Raffaele Guercia, Marc Heumer, Alisa Kutsenko, Maria Aller Rey, Arthur Wong, Suet Ying Yuen"),
+        (6, "Brooklyn Academy of Music", "New York City, USA", "Brooklyn Academy of Music Local Development Corporation", 2000, "Commissioned Study", "Mixed Use", "Rem Koolhaas", "", "Dan Wood, Eric Chang, Matthias Hollwich, Thorsten Kiefer, Casey Mack, Will Prince, Julien De Smedt, Sybille Wälty"),
     ]
-    cur.executemany("INSERT INTO vulns(id, package, language, severity, year) VALUES (?, ?, ?, ?, ?)", demo_rows)
+    cur.executemany("INSERT INTO work(id, name, location, client, year, status, program, partner, associate, team) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", demo_rows)
     conn.commit()
     return conn
 
@@ -614,7 +624,7 @@ def build_answer_composer() -> AnswerComposer:
 def to_evidence_bundle(fused: RetrievalResult) -> EvidenceBundle:
     sql = []
     for r in (fused.sql_rows or []):
-        sql.append(EvidenceRow(table="vulns", values=r, weight=1.0))
+        sql.append(EvidenceRow(table="work", values=r, weight=1.0))
     passages = []
     for p in (fused.passages or []):
         passages.append(EvidencePassage(doc_id=p.doc_id, text=p.text, score=float(getattr(p, "score", 0.0)), meta=getattr(p, "meta", {})))
@@ -622,9 +632,7 @@ def to_evidence_bundle(fused: RetrievalResult) -> EvidenceBundle:
 
 def main():
     parser = argparse.ArgumentParser(description="Hybrid Query System (skeleton)")
-    parser.add_argument("question", nargs="?", help="Natural language question")
     parser.add_argument("--trace", action="store_true", help="Print JSON trace to stderr")
-    # parser.add_argument("--repl", action="store_true", help="Interactive REPL")
     args = parser.parse_args()
 
     pipeline = build_pipeline()
@@ -644,10 +652,13 @@ def main():
             q = input("> ").strip()
         except EOFError:
             break
+
         if q.lower() in ("exit", "quit"):
             break
+
         if not q:
             continue
+
         ask(q)
 
 
