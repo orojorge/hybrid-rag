@@ -10,6 +10,7 @@ from pathlib import Path
 from data_model import ( ContentSelector, FactExtractor, RationaleExtractor, MicroPlanner, SurfaceRealizer,
     ClaimAuditor, CitationManager, Redactor, LengthController, EvidenceBundle, AnswerSpec, GoalType,
     ComposedAnswer, AnswerComposer, Claim, AnswerSections, EvidenceRow, EvidencePassage )
+from sentence_transformers import SentenceTransformer
 
 
 # - - - - - Data models - - - - -
@@ -238,21 +239,27 @@ class SQLClient:
         return [dict(zip(cols, r)) for r in rows]
 
 
+
+# - - - - - VECTOR - - - - - #
 class Embedder:
-    # Placeholder embedder; returns fixed-size bag-of-chars vector for determinism.
+    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+        self.model = SentenceTransformer(model_name)
+
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
-        return [self._embed(t) for t in texts]
+        embeddings = self.model.encode(
+            texts,
+            normalize_embeddings=True,
+            convert_to_numpy=False
+        )
+        return [list(vec) for vec in embeddings]
 
     def embed_query(self, text: str) -> List[float]:
-        return self._embed(text)
-
-    def _embed(self, text: str, dim: int = 32) -> List[float]:
-        v = [0.0] * dim
-        for i, ch in enumerate(text[:256]):
-            v[i % dim] += (ord(ch) % 31) / 31.0
-        # L2 normalize
-        norm = sum(x*x for x in v) ** 0.5 or 1.0
-        return [x / norm for x in v]
+        embedding = self.model.encode(
+            [text],
+            normalize_embeddings=True,
+            convert_to_numpy=False
+        )[0]
+        return list(embedding)
 
 
 class VectorIndex:
@@ -600,7 +607,7 @@ def build_pipeline() -> PipelineController:
     tstore = TextStore()
     boot_text_corpus(embedder, vindex, tstore)
     vec_ret = VectorRetriever(embedder, vindex, tstore)
-    
+
     # Other
     components = dict(
         guardrails=Guardrails(),
